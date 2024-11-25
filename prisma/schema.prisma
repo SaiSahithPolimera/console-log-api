@@ -10,6 +10,42 @@ datasource db {
 model User {
   id       Int    @id @default(autoincrement())
   email    String @unique
+  role     Role   @default(USER)
   username String @unique
-  password String 
+  password String
+}
+
+model Post {
+  id        Int       @id @default(autoincrement())
+  title     String    @unique
+  content   String    @unique
+  createdAt DateTime  @default(now())
+  comments  Comment[]
+  tags      Tag[]
+  likes     Like[]
+}
+
+model Comment {
+  id      Int    @id @default(autoincrement())
+  message String
+  Post    Post?  @relation(fields: [postId], references: [id])
+  postId  Int?
+}
+
+model Tag {
+  name   String @id
+  Post   Post?  @relation(fields: [postId], references: [id])
+  postId Int?
+}
+
+model Like {
+  id        Int   @id @default(autoincrement())
+  likeCount Int
+  Post      Post? @relation(fields: [postId], references: [id])
+  postId    Int?
+}
+
+enum Role {
+  USER
+  ADMIN
 }

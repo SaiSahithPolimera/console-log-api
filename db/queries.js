@@ -18,6 +18,22 @@ const createUser = async (username, password, email) => {
   }
 };
 
+const verifyAdmin = async (username) => {
+  try {
+    const { role } = await prisma.user.findUnique({
+      where: {
+        username: username,
+      },
+    });
+    if (role === "ADMIN") {
+      return true;
+    }
+  } catch (err) {
+    console.error(err);
+  }
+  return false;
+};
+
 const getUserCredentials = async (uname) => {
   try {
     const { username, password } = await prisma.user.findUnique({
@@ -47,4 +63,77 @@ const findUser = async (username) => {
   return false;
 };
 
-module.exports = { createUser, findUser, getUserCredentials };
+const createPost = async (title, content) => {
+  try {
+    const result = await prisma.post.create({
+      data: {
+        title: title,
+        content: content,
+      },
+    });
+    return result;
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+const getAllPosts = async () => {
+  try {
+    const posts = await prisma.post.findMany();
+    return posts;
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+const updatePost = async (title, updatedTitle, updatedContent) => {
+  try {
+    const { id } = await prisma.post.findUnique({
+      where: {
+        title: title,
+      },
+    });
+    const result = await prisma.post.update({
+      where: {
+        id: id,
+      },
+      data: {
+        title: updatedTitle,
+        content: updatedContent,
+      },
+    });
+    if (result) {
+      return true;
+    }
+  } catch (err) {
+    console.error(err);
+  }
+  return false;
+};
+
+const deletePost = async (title) => {
+  try {
+    const result = await prisma.post.delete({
+      where: {
+        title: title,
+      },
+    });
+    if (result) {
+      return true;
+    }
+  } catch (err) {
+    console.error(err);
+  }
+  return false;
+};
+
+module.exports = {
+  createUser,
+  findUser,
+  getUserCredentials,
+  createPost,
+  getAllPosts,
+  updatePost,
+  deletePost,
+  verifyAdmin,
+};

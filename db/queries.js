@@ -18,6 +18,49 @@ const createUser = async (username, password, email) => {
   }
 };
 
+const getPost = async (title) => {
+  try {
+    const post = await prisma.post.findUnique({
+      where: {
+        title: title,
+      },
+      include: {
+        tags: true,
+        comments: true,
+        likes: true,
+      },
+    });
+
+    if (!post) {
+      return { success: false, message: "Post not found" };
+    }
+    const comments = post.comments.map(async (comment) => {
+      if (comment.postId === post.id) {
+        const { username } = await prisma.user.findUnique({
+          where: {
+            id: comment.userId,
+          },
+        });
+        
+        {comment.message, username}
+      }
+    });
+
+    return {
+      success: true,
+      post: {
+        ...post,
+        likeCount: post.likes.l,
+        comments: comments,
+        tags: post.tags.filter((tag) => tag.postId === post.id),
+      },
+    };
+  } catch (err) {
+    console.error(err);
+    return { success: false, message: "Error fetching post" };
+  }
+};
+
 const verifyAdmin = async (username) => {
   try {
     const { role } = await prisma.user.findUnique({
@@ -155,6 +198,77 @@ const deletePost = async (title) => {
   return false;
 };
 
+const createTag = async (tagName, title) => {
+  try {
+    const result = await prisma.tag.create({
+      data: {
+        name: tagName,
+        postId: postID,
+      },
+    });
+    if (result) {
+      return true;
+    }
+  } catch (err) {
+    console.log("Error");
+    console.log(err);
+    if (err.code === "P2002") {
+      return { error: `${err.meta.modelName} already exists` };
+    }
+    console.error(err);
+  }
+  return false;
+};
+
+const getAllTags = async () => {
+  try {
+    const tags = await prisma.tag.findMany();
+    return tags;
+  } catch (err) {
+    console.error(err);
+  }
+  return false;
+};
+
+const likePost = async (title, username) => {
+  try {
+    const post = await prisma.post.findUnique({
+      where: { title },
+    });
+
+    if (!post) {
+      return { success: false, message: "Post not found" };
+    }
+
+    const existingLike = await prisma.like.findFirst({
+      where: {
+        postId: post.id,
+        username: username,
+      },
+    });
+
+    if (existingLike) {
+      await prisma.like.delete({
+        where: { id: existingLike.id },
+      });
+
+      return { success: true, liked: false };
+    }
+
+    await prisma.like.create({
+      data: {
+        post: { connect: { id: post.id } },
+        username: username,
+      },
+    });
+
+    return { success: true, liked: true };
+  } catch (err) {
+    console.error(err);
+    return { success: false, message: "Error processing like" };
+  }
+};
+
 module.exports = {
   createUser,
   findUser,
@@ -164,5 +278,9 @@ module.exports = {
   updatePost,
   deletePost,
   verifyAdmin,
-  addComment
+  addComment,
+  createTag,
+  getAllTags,
+  likePost,
+  getPost,
 };

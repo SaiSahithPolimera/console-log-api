@@ -63,6 +63,34 @@ const findUser = async (username) => {
   return false;
 };
 
+const addComment = async (username, comment, postTitle) => {
+  try {
+    const Post = await prisma.post.findUnique({
+      where: {
+        title: postTitle,
+      },
+    });
+    const User = await prisma.user.findUnique({
+      where: {
+        username: username,
+      },
+    });
+    const result = await prisma.comment.create({
+      data: {
+        postId: Post.id,
+        message: comment,
+        userId: User.id,
+      },
+    });
+    if (result) {
+      return true;
+    }
+  } catch (err) {
+    console.error(err);
+  }
+  return false;
+};
+
 const createPost = async (title, content) => {
   try {
     const result = await prisma.post.create({
@@ -136,4 +164,5 @@ module.exports = {
   updatePost,
   deletePost,
   verifyAdmin,
+  addComment
 };

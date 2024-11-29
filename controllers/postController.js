@@ -1,6 +1,7 @@
 const db = require("../db/queries");
 const jwt = require("jsonwebtoken");
 
+const ACCESS_DENIED_MESSAGE = "Sorry, you are not allowed to access this page";
 const checkAdmin = async (req) => {
   try {
     const bearer = req.headers.authorization;
@@ -10,7 +11,44 @@ const checkAdmin = async (req) => {
     return isAdmin;
   } catch (err) {
     console.error(err);
-    return false;
+  }
+  return false;
+};
+
+const getUserName = async (req) => {
+  try {
+    const bearer = req.headers.authorization;
+    const token = bearer.split(" ")[1];
+    const { username } = jwt.decode(token, process.env.JWT_SECRET_KEY);
+    return username;
+  } catch (err) {
+    console.error(err);
+  }
+  return false;
+};
+
+const addComment = async (req, res) => {
+  const { title } = req.params;
+  const { comment } = req.query;
+  try {
+    const username = await getUserName(req);
+    if (username) {
+      const status = await db.addComment(username, comment, title);
+      if (status === true) {
+        res.json({
+          success: "Comment added successfully!",
+        });
+      }
+    } else {
+      res.json({
+        message: "You must login to comment on a post!",
+      });
+    }
+  } catch (err) {
+    console.error(err);
+    res.json({
+      error: "Error adding comment! Try again!",
+    });
   }
 };
 
@@ -39,7 +77,7 @@ const createPost = async (req, res) => {
     }
   } else {
     res.json({
-      error: "Sorry, you are not allowed to access this page",
+      error: ACCESS_DENIED_MESSAGE,
     });
   }
 };
@@ -66,7 +104,7 @@ const updatePost = async (req, res) => {
     }
   } else {
     res.json({
-      error: "Sorry, you are not allowed to access this page",
+      error: ACCESS_DENIED_MESSAGE,
     });
   }
 };
@@ -87,9 +125,15 @@ const deletePost = async (req, res) => {
     }
   } else {
     res.json({
-      error: "Sorry, you are not allowed to access this page",
+      error: ACCESS_DENIED_MESSAGE,
     });
   }
 };
 
-module.exports = { getAllPosts, createPost, updatePost, deletePost };
+module.exports = {
+  getAllPosts,
+  createPost,
+  updatePost,
+  deletePost,
+  addComment,
+};

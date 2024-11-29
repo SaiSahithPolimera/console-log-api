@@ -8,11 +8,12 @@ datasource db {
 }
 
 model User {
-  id       Int    @id @default(autoincrement())
-  email    String @unique
-  role     Role   @default(USER)
-  username String @unique
+  id       Int       @id @default(autoincrement())
+  email    String    @unique
+  role     Role      @default(USER)
+  username String    @unique
   password String
+  Comment  Comment[]
 }
 
 model Post {
@@ -28,8 +29,11 @@ model Post {
 model Comment {
   id      Int    @id @default(autoincrement())
   message String
-  Post    Post?  @relation(fields: [postId], references: [id])
-  postId  Int?
+  User    User?  @relation(fields: [userId], references: [id])
+
+  Post   Post? @relation(fields: [postId], references: [id])
+  postId Int?
+  userId Int?
 }
 
 model Tag {

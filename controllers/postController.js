@@ -117,8 +117,8 @@ const deletePost = async (req, res) => {
 };
 
 const likePost = async (req, res) => {
-  const { title } = req.params;
-  const username = getUserName(req);
+  const title = req.params.title.split("-").join(" ");
+  const username = await getUserName(req);
   try {
     const response = await db.likePost(title, username);
     res.json({

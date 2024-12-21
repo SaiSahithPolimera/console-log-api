@@ -51,11 +51,18 @@ const getPost = async (title) => {
         return null;
       })
     );
+    const likeCount = await prisma.like.findMany(
+      {
+        where: {
+          postId: post.id
+        }
+      }
+    );
     return {
       success: true,
       post: {
         ...post,
-        likeCount: post.likes.length,
+        likeCount: likeCount.length,
         comments: comments,
         tags: post.tags.filter((tag) => tag.postId === post.id),
       },
@@ -243,10 +250,17 @@ const likePost = async (title, username) => {
       return { success: false, message: "Post not found" };
     }
 
+    const user = await prisma.user.findUnique(
+      {
+        where: {
+          username: username
+        }
+      }
+    )
     const existingLike = await prisma.like.findFirst({
       where: {
         postId: post.id,
-        username: username,
+        userId: user.id,
       },
     });
 
@@ -257,14 +271,12 @@ const likePost = async (title, username) => {
 
       return { success: true, liked: false };
     }
-
     await prisma.like.create({
       data: {
-        post: { connect: { id: post.id } },
-        username: username,
+        postId: post.id,
+        userId: user.id,
       },
     });
-
     return { success: true, liked: true };
   } catch (err) {
     console.error(err);

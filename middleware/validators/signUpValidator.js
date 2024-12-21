@@ -23,16 +23,6 @@ const signUpValidator = [
     .withMessage(`Password ${nullError}`)
     .isLength({ min: 6 })
     .withMessage(`Password ${passwordError}`),
-  body("confirmPassword")
-    .trim()
-    .notEmpty()
-    .withMessage(`Confirm password ${nullError}`)
-    .custom((value, { req }) => {
-      if (value != req.body.password) {
-        throw new Error("Passwords must match!");
-      }
-      return true;
-    }),
 ];
 
 module.exports = signUpValidator;

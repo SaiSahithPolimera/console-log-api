@@ -8,7 +8,7 @@ const createUser = async (username, password, email) => {
         password: password,
       },
     });
-    return "Sign-up success";
+    return "success";
   } catch (err) {
     if (err.code === "P2002") {
       return `${err.meta.target[0]} already exists`;
@@ -34,23 +34,28 @@ const getPost = async (title) => {
     if (!post) {
       return { success: false, message: "Post not found" };
     }
-    const comments = post.comments.map(async (comment) => {
-      if (comment.postId === post.id) {
-        const { username } = await prisma.user.findUnique({
-          where: {
-            id: comment.userId,
-          },
-        });
-        
-        {comment.message, username}
-      }
-    });
-
+    const comments = await Promise.all(
+      (await prisma.comment.findMany(
+        {
+          where:
+          {
+            postId: post.id
+          }
+        }
+      )).map(async (comment) => {
+        if (comment.postId === post.id) {
+          const { username } = await prisma.user.findUnique({ where: { id: comment.userId } });
+          const { message } = comment;
+          return { message, username };
+        }
+        return null;
+      })
+    );
     return {
       success: true,
       post: {
         ...post,
-        likeCount: post.likes.l,
+        likeCount: post.likes.length,
         comments: comments,
         tags: post.tags.filter((tag) => tag.postId === post.id),
       },
@@ -210,8 +215,6 @@ const createTag = async (tagName, title) => {
       return true;
     }
   } catch (err) {
-    console.log("Error");
-    console.log(err);
     if (err.code === "P2002") {
       return { error: `${err.meta.modelName} already exists` };
     }

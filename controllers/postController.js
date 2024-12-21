@@ -3,8 +3,8 @@ const jwt = require("jsonwebtoken");
 
 const getUserName = async (req) => {
   try {
-    const bearer = req.headers.authorization;
-    const token = bearer.split(" ")[1];
+    const bearer = req.rawHeaders.filter((header) => header.includes("token"))[0];
+    const token = bearer.split("=")[1];
     const { username } = jwt.decode(token, process.env.JWT_SECRET_KEY);
     return username;
   } catch (err) {
@@ -15,7 +15,6 @@ const getUserName = async (req) => {
 
 const getPost = async (req, res) => {
   const title = req.params.title.split("-").join(" ");
-  console.log(title);
   try {
     const post = await db.getPost(title);
     if (post) {
@@ -36,7 +35,7 @@ const getPost = async (req, res) => {
 };
 
 const addComment = async (req, res) => {
-  const { title } = req.params;
+  const title = req.params.title.split("-").join(" ");
   const { comment } = req.query;
   try {
     const username = await getUserName(req);

@@ -19,7 +19,7 @@ const login = async (req, res) => {
     const isValid = await bcrypt.compare(password, userData.password);
     if (isValid === true) {
       const token = jwt.sign(userData, process.env.JWT_SECRET_KEY);
-      res.cookie("jwt", token, {
+      res.cookie("token", token, {
         httpOnly: true,
         maxAge: 24 * 60 * 60 * 1000,
       });
@@ -54,9 +54,9 @@ const signup = async (req, res) => {
   if (username && hashedPassword && email) {
     try {
       const message = await db.createUser(username, hashedPassword, email);
-      if (message) {
+      if (message === "success") {
         res.json({
-          message: message,
+          success: true,
         });
       } else {
         res.json({

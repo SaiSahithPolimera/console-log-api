@@ -5,7 +5,6 @@ const addTag = async (req, res) => {
     const { tagName } = req.body;
     if (tagName) {
       const status = await db.createTag(tagName);
-      console.log(status);
       if (status === true) {
         res.sendStatus(200);
       } else {

@@ -18,6 +18,34 @@ const createUser = async (username, password, email) => {
   }
 };
 
+const filterPostsByTag = async (tag) => {
+  try {
+    const posts = await prisma.tag.findMany(
+      {
+        where: {
+          name: tag
+        },
+        select: {
+          postId: true
+        }
+      }
+    );
+    const postIds = posts.map(post => post.postId);
+    const filteredPost = await prisma.post.findMany({
+      where: {
+        id: {
+          in: postIds
+        }
+      }
+    })
+    return filteredPost;
+  }
+  catch (err) {
+    console.error(err)
+  }
+  return false;
+}
+
 const getPost = async (title) => {
   try {
     const post = await prisma.post.findUnique({
@@ -91,12 +119,12 @@ const verifyAdmin = async (username) => {
 
 const getUserCredentials = async (uname) => {
   try {
-    const { username, password } = await prisma.user.findUnique({
+    const { username, password, role } = await prisma.user.findUnique({
       where: {
         username: uname,
       },
     });
-    return { username, password };
+    return { username, password, role };
   } catch (err) {
     console.error(err);
   }
@@ -212,13 +240,26 @@ const deletePost = async (title) => {
 
 const createTag = async (tagName, title) => {
   try {
-    const result = await prisma.tag.create({
+    const post = await prisma.post.findUnique(
+      {
+        where: {
+          title: title
+        }
+      }
+    )
+    const tag = await prisma.tag.create({
       data: {
         name: tagName,
-        postId: postID,
+        postId: post.id,
       },
     });
-    if (result) {
+    await prisma.tagOnPosts.create({
+      data: {
+        tagId: tag.id,
+        postId: post.id
+      }
+    });
+    if (tag) {
       return true;
     }
   } catch (err) {
@@ -298,4 +339,5 @@ module.exports = {
   getAllTags,
   likePost,
   getPost,
+  filterPostsByTag
 };

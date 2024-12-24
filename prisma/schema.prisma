@@ -18,13 +18,22 @@ model User {
 }
 
 model Post {
-  id        Int       @id @default(autoincrement())
-  title     String    @unique
-  content   String    @unique
-  createdAt DateTime  @default(now())
-  comments  Comment[]
-  tags      Tag[]
-  likes     Like[]
+  id         Int          @id @default(autoincrement())
+  title      String       @unique
+  content    String       @unique
+  createdAt  DateTime     @default(now())
+  comments   Comment[]
+  tags       Tag[]
+  likes      Like[]
+  TagOnPosts TagOnPosts[]
+}
+
+model TagOnPosts {
+  id     Int  @id @default(autoincrement())
+  post   Post @relation(fields: [postId], references: [id], onDelete: SetDefault, onUpdate: Cascade)
+  postId Int
+  tag    Tag? @relation(fields: [tagId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  tagId  Int
 }
 
 model Comment {
@@ -37,17 +46,19 @@ model Comment {
 }
 
 model Tag {
-  name   String @id
-  Post   Post?  @relation(fields: [postId], references: [id])
-  postId Int?
+  id         Int          @id @default(autoincrement())
+  name       String
+  Post       Post?        @relation(fields: [postId], references: [id])
+  postId     Int?
+  TagOnPosts TagOnPosts[]
 }
 
 model Like {
-  id        Int   @id @default(autoincrement())
-  Post      Post? @relation(fields: [postId], references: [id])
-  postId    Int?
-  userId    Int
-  User      User  @relation(fields: [userId], references: [id])
+  id     Int   @id @default(autoincrement())
+  Post   Post? @relation(fields: [postId], references: [id])
+  postId Int?
+  userId Int
+  User   User  @relation(fields: [userId], references: [id])
 }
 
 enum Role {

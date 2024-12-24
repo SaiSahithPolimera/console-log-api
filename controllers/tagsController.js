@@ -2,9 +2,9 @@ const db = require("../db/queries");
 
 const addTag = async (req, res) => {
   try {
-    const { tagName } = req.body;
+    const { tagName, title } = req.body;
     if (tagName) {
-      const status = await db.createTag(tagName);
+      const status = await db.createTag(tagName, title);
       if (status === true) {
         res.sendStatus(200);
       } else {
@@ -22,6 +22,28 @@ const addTag = async (req, res) => {
     });
   }
 };
+
+const getPostsByTag = async (req, res) => {
+  const { tag } = req.params;
+  const posts = await db.filterPostsByTag(tag);
+  try {
+    if (posts) {
+      res.json({
+        posts
+      })
+    }
+    else {
+      res.json({
+        error: "Error! could not find posts"
+      })
+    }
+  }
+  catch (err) {
+    res.json({
+      error: "Error! occurred while retrieving posts"
+    })
+  }
+}
 
 const getAllTags = async (req, res) => {
   try {
@@ -42,4 +64,4 @@ const getAllTags = async (req, res) => {
   }
 };
 
-module.exports = { addTag, getAllTags };
+module.exports = { addTag, getAllTags, getPostsByTag };

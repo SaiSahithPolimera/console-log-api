@@ -15,6 +15,7 @@ const login = async (req, res) => {
   }
   const { username, password } = req.body;
   const userData = await db.getUserCredentials(username);
+  const isAdmin = userData.role === "ADMIN" ? true : false;
   if (userData) {
     const isValid = await bcrypt.compare(password, userData.password);
     if (isValid === true) {
@@ -25,6 +26,7 @@ const login = async (req, res) => {
       });
       res.json({
         status: true,
+        isAdmin: isAdmin,
         message: "Login success!",
       });
     } else {

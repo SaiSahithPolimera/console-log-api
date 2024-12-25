@@ -70,7 +70,7 @@ const getAllPosts = async (req, res) => {
 
 const createPost = async (req, res) => {
   const { title, content } = req.body;
-  const result = await db.createPost(title, content.toString());
+  const result = await db.createPost(title, content);
   if (result) {
     res.json({
       message: "Post created!",
@@ -103,7 +103,7 @@ const updatePost = async (req, res) => {
 };
 
 const deletePost = async (req, res) => {
-  const { title } = req.params;
+  const title = req.params.title.split("-").join(" ");
   const status = await db.deletePost(title);
   if (status) {
     res.json({

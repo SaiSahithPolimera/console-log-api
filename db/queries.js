@@ -233,7 +233,7 @@ const updatePost = async (title, updatedTitle, updatedContent) => {
   return false;
 };
 
-const deletePost = async (title) => {
+const deletePost = async (title) => {  
   try {
     const result = await prisma.post.delete({
       where: {

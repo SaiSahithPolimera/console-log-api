@@ -30,7 +30,7 @@ model Post {
 
 model TagOnPosts {
   id     Int  @id @default(autoincrement())
-  post   Post @relation(fields: [postId], references: [id], onDelete: SetDefault, onUpdate: Cascade)
+  post   Post @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   postId Int
   tag    Tag? @relation(fields: [tagId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   tagId  Int
@@ -40,7 +40,7 @@ model Comment {
   id      Int    @id @default(autoincrement())
   message String
   User    User?  @relation(fields: [userId], references: [id])
-  Post    Post?  @relation(fields: [postId], references: [id])
+  Post    Post?  @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   postId  Int?
   userId  Int?
 }
@@ -48,14 +48,14 @@ model Comment {
 model Tag {
   id         Int          @id @default(autoincrement())
   name       String       @unique
-  Post       Post?        @relation(fields: [postId], references: [id])
+  Post       Post?        @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   postId     Int?
   TagOnPosts TagOnPosts[]
 }
 
 model Like {
   id     Int   @id @default(autoincrement())
-  Post   Post? @relation(fields: [postId], references: [id])
+  Post   Post? @relation(fields: [postId], references: [id], onDelete: Cascade)
   postId Int?
   userId Int
   User   User  @relation(fields: [userId], references: [id])

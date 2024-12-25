@@ -86,13 +86,24 @@ const getPost = async (title) => {
         }
       }
     );
+    const tagOnPosts = await prisma.tagOnPosts.findMany({
+      where: {
+        postId: post.id
+      }
+    })
+    const tagIds = tagOnPosts.map(tagOnPost => tagOnPost.tagId);
+    const tags = await prisma.tag.findMany({
+      where: {
+        id: { in: tagIds}
+      }
+    })
     return {
       success: true,
       post: {
         ...post,
         likeCount: likeCount.length,
         comments: comments,
-        tags: post.tags.filter((tag) => tag.postId === post.id),
+        tags: tags,
       },
     };
   } catch (err) {
@@ -239,6 +250,7 @@ const deletePost = async (title) => {
 };
 
 const createTag = async (tagName, title) => {
+  let status = false;
   try {
     const post = await prisma.post.findUnique(
       {
@@ -247,28 +259,43 @@ const createTag = async (tagName, title) => {
         }
       }
     )
-    const tag = await prisma.tag.create({
-      data: {
-        name: tagName,
-        postId: post.id,
-      },
-    });
-    await prisma.tagOnPosts.create({
-      data: {
-        tagId: tag.id,
-        postId: post.id
+    const existingTag = await prisma.tag.findUnique({
+      where: {
+        name: tagName
       }
-    });
-    if (tag) {
-      return true;
+    })
+    if (existingTag) {
+      await prisma.tagOnPosts.create({
+        data: {
+          tagId: existingTag.id,
+          postId: post.id
+        }
+      });
+      status = true;
     }
+    else {
+      const tag = await prisma.tag.create({
+        data: {
+          name: tagName,
+          postId: post.id,
+        },
+      });
+      await prisma.tagOnPosts.create({
+        data: {
+          tagId: tag.id,
+          postId: post.id
+        }
+      });
+      status = true;
+    }
+    return status;
   } catch (err) {
     if (err.code === "P2002") {
       return { error: `${err.meta.modelName} already exists` };
     }
     console.error(err);
   }
-  return false;
+  return status;
 };
 
 const getAllTags = async () => {

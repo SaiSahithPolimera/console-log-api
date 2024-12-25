@@ -58,7 +58,7 @@ const getAllTags = async (req, res) => {
       });
     }
   } catch (err) {
-    res.json({
+    res.json({  
       error: "Error occurred while retrieving tag data!",
     });
   }

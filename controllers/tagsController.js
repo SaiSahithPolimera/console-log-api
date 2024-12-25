@@ -23,6 +23,27 @@ const addTag = async (req, res) => {
   }
 };
 
+const deleteTag = async (req, res) => {
+  try {
+    const { tagName, title } = req.body;
+    if (tagName) {
+      const status = await db.deleteTag(tagName, title);
+      if (status === true) {
+        res.sendStatus(200);
+      }
+      else {
+        res.json(status);
+      }
+    }
+  }
+  catch (err) {
+    console.error(err);
+    res.json({
+      error: "Error occurred while deleting tag!"
+    })
+  }
+}
+
 const getPostsByTag = async (req, res) => {
   const { tag } = req.params;
   const posts = await db.filterPostsByTag(tag);
@@ -58,10 +79,10 @@ const getAllTags = async (req, res) => {
       });
     }
   } catch (err) {
-    res.json({  
+    res.json({
       error: "Error occurred while retrieving tag data!",
     });
   }
 };
 
-module.exports = { addTag, getAllTags, getPostsByTag };
+module.exports = { addTag, getAllTags, getPostsByTag, deleteTag };

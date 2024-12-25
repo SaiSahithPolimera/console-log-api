@@ -94,7 +94,7 @@ const getPost = async (title) => {
     const tagIds = tagOnPosts.map(tagOnPost => tagOnPost.tagId);
     const tags = await prisma.tag.findMany({
       where: {
-        id: { in: tagIds}
+        id: { in: tagIds }
       }
     })
     return {
@@ -249,6 +249,43 @@ const deletePost = async (title) => {
   return false;
 };
 
+const deleteTag = async (tagName, title) => {
+  try {
+    const post = await prisma.post.findUnique(
+      {
+        where: {
+          title: title
+        }
+      }
+    )
+    const tag = await prisma.tag.findUnique({
+      where: {
+        name: tagName
+      }
+    })
+    const tagOnPost = await prisma.tagOnPosts.findFirst({
+      where: {
+        postId: post.id,
+        tagId: tag.id,
+      },
+    })
+    const result = await prisma.tagOnPosts.delete(
+      {
+        where: {
+          id: tagOnPost.id
+        }
+      }
+    )
+    if (result) {
+      return true;
+    }
+  }
+  catch (err) {
+    console.error(err);
+    return false;
+  }
+}
+
 const createTag = async (tagName, title) => {
   let status = false;
   try {
@@ -366,5 +403,6 @@ module.exports = {
   getAllTags,
   likePost,
   getPost,
-  filterPostsByTag
+  filterPostsByTag,
+  deleteTag
 };

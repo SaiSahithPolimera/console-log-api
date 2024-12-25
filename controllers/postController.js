@@ -83,7 +83,8 @@ const createPost = async (req, res) => {
 };
 
 const updatePost = async (req, res) => {
-  const { title, updatedTitle, updatedContent } = req.body;
+  const { updatedTitle, updatedContent } = req.body;
+  const title = req.body.title.split("-").join(" ");
   if (title && updatedTitle && updatedContent) {
     const status = await db.updatePost(title, updatedTitle, updatedContent);
     if (status) {
@@ -97,7 +98,7 @@ const updatePost = async (req, res) => {
     }
   } else {
     res.json({
-      message: "Please modify the post to update it!",
+      error: "Please modify the post to update it!",
     });
   }
 };

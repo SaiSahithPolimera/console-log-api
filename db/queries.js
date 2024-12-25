@@ -210,14 +210,14 @@ const getAllPosts = async () => {
 
 const updatePost = async (title, updatedTitle, updatedContent) => {
   try {
-    const { id } = await prisma.post.findUnique({
+    const post = await prisma.post.findUnique({
       where: {
         title: title,
       },
     });
     const result = await prisma.post.update({
       where: {
-        id: id,
+        id: post.id,
       },
       data: {
         title: updatedTitle,
@@ -233,7 +233,7 @@ const updatePost = async (title, updatedTitle, updatedContent) => {
   return false;
 };
 
-const deletePost = async (title) => {  
+const deletePost = async (title) => {
   try {
     const result = await prisma.post.delete({
       where: {

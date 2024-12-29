@@ -8,12 +8,10 @@ const cookieParser = require('cookie-parser');
 
 
 app.use(express.json());
-app.use(cors(
-  {
-    origin: process.env.ADMIN_URL || process.env.CLIENT_URL,
-    credentials: true,
-  }
-));
+app.use(cors({
+  origin: [process.env.CLIENT_URL, process.env.ADMIN_URL],
+  credentials: true,
+}));
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: false }));
 app.use(authRouter);

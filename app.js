@@ -4,13 +4,13 @@ const cors = require("cors");
 const authRouter = require("./routes/authRouter");
 const postRouter = require("./routes/postRouter");
 const tagsRouter = require("./routes/tagsRouter");
-const cookieParser = require('cookie-parser');  
+const cookieParser = require('cookie-parser');
 
 
 app.use(express.json());
 app.use(cors(
   {
-    origin: process.env.ORIGIN_URL,
+    origin: process.env.ADMIN_URL || process.env.CLIENT_URL,
     credentials: true,
   }
 ));

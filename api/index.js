@@ -1,8 +1,6 @@
 const express = require("express");
-const serverless = require("serverless-http");
-const cors = require("cors");
 const cookieParser = require("cookie-parser");
-
+const cors = require("cors");
 const authRouter = require("../routes/authRouter");
 const postRouter = require("../routes/postRouter");
 const tagsRouter = require("../routes/tagsRouter");
@@ -21,4 +19,6 @@ app.use(authRouter);
 app.use(postRouter);
 app.use(tagsRouter);
 
-module.exports = serverless(app);
+app.listen(3000, () => console.log("Server ready on port 3000."));
+
+module.exports= app
